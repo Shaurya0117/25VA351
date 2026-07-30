@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consensus — No agent acts alone.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F121A;
+    --panel:#171B25;
+    --panel-alt:#1C2130;
+    --border:#2B3142;
+    --border-soft:#232838;
+    --text:#EAE7DD;
+    --text-dim:#8B92A5;
+    --text-dimmer:#5C637A;
+    --gold:#D4A54A;
+    --gold-dim:#8A713A;
+    --green:#4FD1A5;
+    --red:#E8604A;
+    --blue:#6E9FE8;
+    --radius:10px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased;}
+  body{
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(212,165,74,0.05), transparent 40%),
+      radial-gradient(circle at 85% 20%, rgba(110,159,232,0.04), transparent 45%);
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  ::selection{ background:var(--gold); color:#10131A; }
+
+  a{ color:inherit; }
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 40px;
+    border-bottom:1px solid var(--border-soft);
+    position:sticky; top:0; z-index:50;
+    background:rgba(15,18,26,0.88);
+    backdrop-filter:blur(10px);
+  }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .seal{ width:34px; height:34px; flex-shrink:0; }
+  .brand-name{
+    font-family:'Fraunces', serif; font-weight:600; font-size:20px;
+    letter-spacing:0.01em;
+  }
+  .brand-tag{
+    font-size:11px; color:var(--text-dimmer); font-family:'IBM Plex Mono', monospace;
+    letter-spacing:0.03em; margin-top:2px;
+  }
+  nav{ display:flex; gap:32px; font-size:13px; color:var(--text-dim); font-weight:500; }
+  nav span.active{ color:var(--text); }
+  .header-right{ display:flex; align-items:center; gap:22px; }
+  .score-chip{
+    display:flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--text-dim);
+    border:1px solid var(--border); padding:6px 12px; border-radius:20px;
+  }
+  .score-chip b{ color:var(--gold); font-size:13px; }
+  .dot-live{ width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 0 3px rgba(79,209,165,0.15); animation:pulse 2s infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+  @media (max-width:820px){
+    nav{ display:none; }
+    header{ padding:18px 20px; }
+  }
+
+  /* ---------- Layout ---------- */
+  .wrap{
+    max-width:1180px; margin:0 auto; padding:40px 40px 0;
+    display:grid; grid-template-columns:1.65fr 1fr; gap:28px;
+  }
+  @media (max-width:900px){
+    .wrap{ grid-template-columns:1fr; padding:28px 20px 0; }
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--text-dimmer); margin-bottom:10px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::after{ content:""; flex:1; height:1px; background:var(--border-soft); }
+
+  /* ---------- Docket card ---------- */
+  .docket{
+    background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    padding:28px 28px 24px; margin-bottom:26px;
+  }
+  .docket-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap; }
+  .case-id{ font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--text-dimmer); margin-bottom:6px; }
+  .docket h1{
+    font-family:'Fraunces', serif; font-weight:500; font-size:27px; line-height:1.28;
+    max-width:560px;
+  }
+  .status-pill{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.04em;
+    padding:6px 12px; border-radius:20px; border:1px solid; white-space:nowrap; height:fit-content;
+  }
+  .status-pill.deliberating{ color:var(--gold); border-color:var(--gold-dim); background:rgba(212,165,74,0.08); }
+  .status-pill.approved{ color:var(--green); border-color:rgba(79,209,165,0.4); background:rgba(79,209,165,0.08); }
+  .status-pill.escalated{ color:var(--red); border-color:rgba(232,96,74,0.4); background:rgba(232,96,74,0.08); }
+
+  .docket-meta{ display:flex; gap:28px; margin-top:20px; flex-wrap:wrap; }
+  .meta-item{ font-size:13px; }
+  .meta-item .k{ color:var(--text-dimmer); font-size:11px; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; }
+  .meta-item .v{ color:var(--text); font-family:'IBM Plex Mono', monospace; }
+
+  .run-btn{
+    margin-top:22px; width:100%;
+    background:var(--gold); color:#191307; border:none; border-radius:8px;
+    font-family:'Inter',sans-serif; font-weight:600; font-size:14px;
+    padding:13px; cursor:pointer; transition:filter .15s ease, transform .1s ease;
+  }
+  .run-btn:hover{ filter:brightness(1.08); }
+  .run-btn:active{ transform:scale(0.99); }
+  .run-btn:disabled{ opacity:0.5; cursor:not-allowed; filter:none; }
+
+  /* ---------- Transcript ---------- */
+  .transcript{
+    background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    padding:6px 0 8px; min-height:200px;
+  }
+  .transcript-head{
+    padding:18px 24px 14px; border-bottom:1px solid var(--border-soft);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .transcript-head h2{ font-family:'Fraunces', serif; font-weight:500; font-size:16px; }
+  .transcript-head span{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--text-dimmer); }
+  .log{ padding:8px 24px 20px; }
+  .entry{
+    display:flex; gap:14px; padding:16px 0; border-bottom:1px solid var(--border-soft);
+    opacity:0; transform:translateY(6px); animation:enter .4s ease forwards;
+  }
+  .entry:last-child{ border-bottom:none; }
+  @keyframes enter{ to{ opacity:1; transform:translateY(0); } }
+  .avatar{
+    width:30px; height:30px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600;
+    margin-top:2px;
+  }
+  .avatar.proposer{ background:rgba(110,159,232,0.15); color:var(--blue); border:1px solid rgba(110,159,232,0.3); }
+  .avatar.challenger{ background:rgba(232,96,74,0.15); color:var(--red); border:1px solid rgba(232,96,74,0.3); }
+  .avatar.verifier{ background:rgba(79,209,165,0.15); color:var(--green); border:1px solid rgba(79,209,165,0.3); }
+  .entry-body{ flex:1; min-width:0; }
+  .entry-top{ display:flex; align-items:baseline; gap:10px; margin-bottom:5px; flex-wrap:wrap; }
+  .agent-name{ font-weight:600; font-size:13.5px; }
+  .role-tag{
+    font-family:'IBM Plex Mono', monospace; font-size:10px; text-transform:uppercase;
+    letter-spacing:0.05em; padding:2px 7px; border-radius:10px; border:1px solid var(--border);
+    color:var(--text-dim);
+  }
+  .entry-time{ font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--text-dimmer); margin-left:auto; }
+  .entry-text{ font-size:13.5px; line-height:1.55; color:#D3D0C6; }
+
+  .verdict-wrap{ display:flex; justify-content:center; padding:26px 0 8px; }
+  .stamp{
+    width:150px; height:150px; border-radius:50%;
+    border:3px solid var(--green); color:var(--green);
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    font-family:'IBM Plex Mono', monospace; font-weight:600; font-size:13px;
+    letter-spacing:0.06em; text-transform:uppercase; line-height:1.4;
+    transform:scale(2.2) rotate(-14deg); opacity:0;
+    animation:stampIn .5s cubic-bezier(.2,1.4,.4,1) forwards;
+    box-shadow:0 0 0 4px rgba(79,209,165,0.08);
+  }
+  .stamp.rejected{ border-color:var(--red); color:var(--red); box-shadow:0 0 0 4px rgba(232,96,74,0.08); }
+  @keyframes stampIn{
+    0%{ transform:scale(2.2) rotate(-14deg); opacity:0; }
+    60%{ transform:scale(0.94) rotate(-14deg); opacity:1; }
+    100%{ transform:scale(1) rotate(-14deg); opacity:1; }
+  }
+
+  .empty-state{
+    padding:50px 24px; text-align:center; color:var(--text-dimmer);
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; line-height:1.7;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .side-card{
+    background:var(--panel); border:1px solid var(--border); border-radius:var(--radius);
+    padding:22px 22px 20px; margin-bottom:22px;
+  }
+  .side-card h3{ font-family:'Fraunces', serif; font-weight:500; font-size:15px; margin-bottom:16px; }
+
+  /* Trust dial */
+  .dial-row{ display:flex; align-items:center; gap:18px; }
+  .dial{ position:relative; width:96px; height:96px; flex-shrink:0; }
+  .dial svg{ transform:rotate(-90deg); }
+  .dial-num{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace; font-size:22px; font-weight:600; color:var(--gold);
+  }
+  .dial-label{ font-size:12.5px; color:var(--text-dim); line-height:1.6; }
+  .dial-label b{ color:var(--text); display:block; font-size:13px; margin-bottom:3px; }
+
+  /* Agent roster */
+  .agent-row{ display:flex; align-items:center; gap:12px; padding:9px 0; }
+  .agent-row .avatar{ width:26px; height:26px; font-size:11px; }
+  .agent-row-name{ font-size:13px; font-weight:500; flex:1; }
+  .status-dot{ width:7px; height:7px; border-radius:50%; }
+  .status-dot.idle{ background:var(--text-dimmer); }
+  .status-dot.active{ background:var(--gold); box-shadow:0 0 0 3px rgba(212,165,74,0.15); animation:pulse 1.4s infinite; }
+  .agent-status-txt{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--text-dimmer); }
+
+  /* Ledger */
+  .ledger-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 0; border-bottom:1px solid var(--border-soft); font-size:12.5px;
+  }
+  .ledger-row:last-child{ border-bottom:none; }
+  .ledger-case{ font-family:'IBM Plex Mono', monospace; color:var(--text-dim); }
+  .ledger-verdict{ font-family:'IBM Plex Mono', monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.04em; padding:3px 9px; border-radius:10px; }
+  .ledger-verdict.approved{ color:var(--green); background:rgba(79,209,165,0.1); }
+  .ledger-verdict.escalated{ color:var(--red); background:rgba(232,96,74,0.1); }
+
+  footer{
+    text-align:center; margin-top:50px; padding:0 40px;
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--text-dimmer);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <svg class="seal" viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="20" r="18.5" stroke="#D4A54A" stroke-width="1.4"/>
+      <path d="M13 20.5L17.5 25L27.5 14" stroke="#D4A54A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M12 13L28 27" stroke="#D4A54A" stroke-width="1" stroke-linecap="round" opacity="0.35"/>
+      <path d="M28 13L12 27" stroke="#D4A54A" stroke-width="1" stroke-linecap="round" opacity="0.35"/>
+    </svg>
+    <div>
+      <div class="brand-name">Consensus</div>
+      <div class="brand-tag">NO AGENT ACTS ALONE</div>
+    </div>
+  </div>
+  <nav>
+    <span class="active">Docket</span>
+    <span>Ledger</span>
+    <span>Agents</span>
+  </nav>
+  <div class="header-right">
+    <div class="score-chip"><span class="dot-live"></span> LIVE &nbsp; TRUST SCORE&nbsp; <b id="headerScore">91</b></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- LEFT COLUMN -->
+  <div>
+    <div class="eyebrow">Active Case</div>
+    <div class="docket">
+      <div class="docket-top">
+        <div>
+          <div class="case-id" id="caseId">CASE #0472</div>
+          <h1 id="caseTitle">Agent Atlas proposes: issue a $84.00 refund on order #4471</h1>
+        </div>
+        <div class="status-pill deliberating" id="statusPill">DELIBERATING</div>
+      </div>
+      <div class="docket-meta">
+        <div class="meta-item"><div class="k">Requesting Agent</div><div class="v" id="metaAgent">atlas</div></div>
+        <div class="meta-item"><div class="k">Action Type</div><div class="v" id="metaType">refund.execute</div></div>
+        <div class="meta-item"><div class="k">Risk Level</div><div class="v" id="metaRisk">medium</div></div>
+      </div>
+      <button class="run-btn" id="runBtn">Run Deliberation</button>
+    </div>
+
+    <div class="eyebrow">Live Transcript</div>
+    <div class="transcript">
+      <div class="transcript-head">
+        <h2>Agent Exchange</h2>
+        <span id="transcriptStatus">awaiting run</span>
+      </div>
+      <div class="log" id="log">
+        <div class="empty-state" id="emptyState">
+          No deliberation in progress.<br>Press "Run Deliberation" to watch the agents check each other's work.
+        </div>
+      </div>
+      <div class="verdict-wrap" id="verdictWrap"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div>
+    <div class="side-card">
+      <h3>Trust Score</h3>
+      <div class="dial-row">
+        <div class="dial">
+          <svg width="96" height="96" viewBox="0 0 96 96">
+            <circle cx="48" cy="48" r="42" stroke="#2B3142" stroke-width="7" fill="none"/>
+            <circle id="dialArc" cx="48" cy="48" r="42" stroke="#D4A54A" stroke-width="7" fill="none"
+              stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="24"/>
+          </svg>
+          <div class="dial-num" id="dialNum">91</div>
+        </div>
+        <div class="dial-label"><b>System confidence</b>Rolling average across the last 20 consensus rounds.</div>
+      </div>
+    </div>
+
+    <div class="side-card">
+      <h3>Active Agents</h3>
+      <div id="agentList"></div>
+    </div>
+
+    <div class="side-card">
+      <h3>Recent Decisions</h3>
+      <div id="ledgerList"></div>
+    </div>
+  </div>
+</div>
+
+<footer>Consensus — a multi-agent trust layer. Built for the Essex Hackathon.</footer>
+
+<script>
+const agents = [
+  { key:'atlas',   name:'Atlas',   role:'PROPOSER',   cls:'proposer'   },
+  { key:'juno',    name:'Juno',    role:'CHALLENGER', cls:'challenger' },
+  { key:'vessel',  name:'Vessel',  role:'VERIFIER',   cls:'verifier'   },
+];
+
+const scenarios = [
+  {
+    caseId:'CASE #0472', agent:'atlas', type:'refund.execute', risk:'medium',
+    title:'Agent Atlas proposes: issue a $84.00 refund on order #4471',
+    lines:[
+      { who:'atlas',  text:'Order #4471 flagged as damaged-on-arrival by customer photo evidence. Proposing full refund of $84.00.' },
+      { who:'juno',   text:'Challenge: photo timestamp is 11 days after delivery, outside the 7-day damage window. Requesting justification.' },
+      { who:'atlas',  text:'Customer support notes show a prior extension was granted on 2026-07-12. Escalating evidence to Vessel.' },
+      { who:'vessel', text:'Extension record verified against support log. Refund conditions are satisfied. Approving execution.' },
+    ],
+    verdict:'approved',
+  },
+  {
+    caseId:'CASE #0473', agent:'bramble', type:'file.delete', risk:'high',
+    title:'Agent Bramble proposes: delete 214 files matching "temp_*" from shared drive',
+    lines:[
+      { who:'atlas',  text:'Scanning proposed deletion set. 6 of the 214 matched files were modified in the last 24 hours.' },
+      { who:'juno',   text:'Challenge: recently modified files should not be treated as temporary. Recommend excluding them from the batch.' },
+      { who:'vessel', text:'Confirmed 6 files fall outside safe-delete criteria. Full batch cannot be approved as proposed.' },
+    ],
+    verdict:'rejected',
+  },
+  {
+    caseId:'CASE #0474', agent:'orin', type:'email.broadcast', risk:'high',
+    title:'Agent Orin proposes: send price-change email to all 40,200 subscribers',
+    lines:[
+      { who:'atlas',  text:'Draft references a 15% price increase effective in 3 days. Checking against active promotions.' },
+      { who:'juno',   text:'Challenge: 2,300 subscribers are inside an active loyalty-lock period exempting them from this change. Segment overlap detected.' },
+      { who:'atlas',  text:'Confirmed. Regenerating send list excluding the loyalty-lock segment before re-submitting.' },
+      { who:'vessel', text:'Revised segment (37,900 recipients) matches policy. Approving execution.' },
+    ],
+    verdict:'approved',
+  },
+];
+
+let ledger = [
+  { id:'CASE #0468', verdict:'approved' },
+  { id:'CASE #0469', verdict:'approved' },
+  { id:'CASE #0470', verdict:'escalated' },
+  { id:'CASE #0471', verdict:'approved' },
+];
+let trustScore = 91;
+let scenarioIndex = 0;
+let running = false;
+
+const agentListEl = document.getElementById('agentList');
+const ledgerListEl = document.getElementById('ledgerList');
+const runBtn = document.getElementById('runBtn');
+const logEl = document.getElementById('log');
+const emptyState = document.getElementById('emptyState');
+const verdictWrap = document.getElementById('verdictWrap');
+const transcriptStatus = document.getElementById('transcriptStatus');
+const statusPill = document.getElementById('statusPill');
+
+function renderAgents(activeKey){
+  agentListEl.innerHTML = agents.map(a => `
+    <div class="agent-row">
+      <div class="avatar ${a.cls}">${a.name[0]}</div>
+      <div class="agent-row-name">${a.name}<br><span class="agent-status-txt">${a.role}</span></div>
+      <span class="status-dot ${activeKey===a.key ? 'active':'idle'}"></span>
+    </div>
+  `).join('');
+}
+
+function renderLedger(){
+  ledgerListEl.innerHTML = ledger.slice(-5).reverse().map(l => `
+    <div class="ledger-row">
+      <span class="ledger-case">${l.id}</span>
+      <span class="ledger-verdict ${l.verdict}">${l.verdict}</span>
+    </div>
+  `).join('');
+}
+
+function setDial(score){
+  const circumference = 264;
+  const offset = circumference - (circumference * score/100);
+  document.getElementById('dialArc').style.strokeDashoffset = offset;
+  document.getElementById('dialArc').style.stroke = score >= 70 ? '#D4A54A' : '#E8604A';
+  document.getElementById('dialNum').textContent = score;
+  document.getElementById('headerScore').textContent = score;
+}
+
+function loadScenario(s){
+  document.getElementById('caseId').textContent = s.caseId;
+  document.getElementById('caseTitle').textContent = s.title;
+  document.getElementById('metaAgent').textContent = s.agent;
+  document.getElementById('metaType').textContent = s.type;
+  document.getElementById('metaRisk').textContent = s.risk;
+  statusPill.className = 'status-pill deliberating';
+  statusPill.textContent = 'DELIBERATING';
+}
+
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+async function runDeliberation(){
+  if(running) return;
+  running = true;
+  runBtn.disabled = true;
+  runBtn.textContent = 'Deliberation in progress…';
+  transcriptStatus.textContent = 'streaming…';
+  emptyState.style.display = 'none';
+  logEl.innerHTML = '';
+  verdictWrap.innerHTML = '';
+
+  const s = scenarios[scenarioIndex % scenarios.length];
+  loadScenario(s);
+
+  for(const line of s.lines){
+    const a = agents.find(ag => ag.key === line.who);
+    renderAgents(a.key);
+    await sleep(650);
+    const entry = document.createElement('div');
+    entry.className = 'entry';
+    entry.innerHTML = `
+      <div class="avatar ${a.cls}">${a.name[0]}</div>
+      <div class="entry-body">
+        <div class="entry-top">
+          <span class="agent-name">${a.name}</span>
+          <span class="role-tag">${a.role}</span>
+          <span class="entry-time">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+        </div>
+        <div class="entry-text">${line.text}</div>
+      </div>
+    `;
+    logEl.appendChild(entry);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  renderAgents(null);
+  await sleep(400);
+
+  const approved = s.verdict === 'approved';
+  statusPill.className = 'status-pill ' + (approved ? 'approved' : 'escalated');
+  statusPill.textContent = approved ? 'APPROVED' : 'ESCALATED';
+  transcriptStatus.textContent = 'consensus reached';
+
+  const stamp = document.createElement('div');
+  stamp.className = 'stamp' + (approved ? '' : ' rejected');
+  stamp.textContent = approved ? 'Consensus Reached\n· Approved ·' : 'Consensus Failed\n· Escalated ·';
+  stamp.style.whiteSpace = 'pre-line';
+  verdictWrap.appendChild(stamp);
+
+  ledger.push({ id: s.caseId, verdict: approved ? 'approved' : 'escalated' });
+  renderLedger();
+
+  trustScore = Math.max(60, Math.min(99, trustScore + (approved ? 1 : -2)));
+  setDial(trustScore);
+
+  scenarioIndex++;
+  running = false;
+  runBtn.disabled = false;
+  runBtn.textContent = 'Run Next Deliberation';
+}
+
+renderAgents(null);
+renderLedger();
+setDial(trustScore);
+runBtn.addEventListener('click', runDeliberation);
+</script>
+
+</body>
+</html>

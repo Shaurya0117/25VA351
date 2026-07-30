@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <script>
+            function sum()
+            {
+                let age = parseInt(prompt("Enter the value of A : "));
+                if(age>=18){
+                    let c = confirm("Do u want to submit you responce ");
+                    if(c){
+                        alert("Your response have been submitted")
+                    }
+                    alert("You are eligible for voting ");
+                }
+                else{
+                    alert("You are not eligible ");
+                }
+
+            }
+        </script>
+    </head>
+    <body>
+        <h1>"Eligibilty Criteria"
+        <input type="button" 
+               onclick="sum()" 
+               value="result">
+    </body>
+</html>
