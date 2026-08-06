@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BMI — Measure</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <p class="eyebrow">Body Measurement · No. 01</p>
+  <h1>BMI Tape</h1>
+  <p class="sub">Enter your measurements to find where you fall on the scale.</p>
+
+  <div class="card">
+    <div class="row">
+      <div class="field">
+        <label for="height">Height (cm)</label>
+        <div class="input-line">
+          <input type="number" id="height" placeholder="170" inputmode="decimal">
+          <span class="unit">cm</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="weight">Weight (kg)</label>
+        <div class="input-line">
+          <input type="number" id="weight" placeholder="65" inputmode="decimal">
+          <span class="unit">kg</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="measure-btn" onclick="calculateBMI()">Take the measurement</button>
+
+    <div class="result" id="result">
+      <div class="reading">
+        <div class="num" id="bmiValue">0.0</div>
+        <div class="tag" id="bmiTag">—</div>
+      </div>
+
+      <div class="gauge-wrap">
+        <div class="needle" id="needle"></div>
+        <div class="gauge">
+          <div class="zone under"></div>
+          <div class="zone normal"></div>
+          <div class="zone over"></div>
+          <div class="zone obese"></div>
+        </div>
+        <div class="ticks">
+          <span>15</span>
+          <span>18.5</span>
+          <span>25</span>
+          <span>30</span>
+          <span>40+</span>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div><span class="dot under"></span>Underweight</div>
+        <div><span class="dot normal"></span>Normal</div>
+        <div><span class="dot over"></span>Overweight</div>
+        <div><span class="dot obese"></span>Obese</div>
+      </div>
+
+      <p class="note" id="note"></p>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
