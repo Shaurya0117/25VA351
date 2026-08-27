@@ -1,7 +1,7 @@
-it//Object creation
+//Object creation
 
 // Object 1
-let student = {
+/*let student = {
     first: "Shaurya",
     last: "Singh",
     city: "Jaunpur",
@@ -36,4 +36,24 @@ sumit.salary = function() {
 console.log(sumit.name);
 console.log(sumit.pincode);
 console.log(sumit.city);
-console.log(sumit.salary);
+console.log(sumit.salary);  */
+
+
+
+function students(name, rollno, pincode, city) {
+    this.name = name;
+    this.rollno = rollno;
+    this.pincode = pincode;
+    this.city = city;
+}
+
+let student1 = new students("Shaurya", 101, 222145, "Jaunpur");
+let student2 = new students("Sumit", 102, 887879, "Ghaziabad");
+
+console.log(student1.name);
+console.log(student1.rollno);
+console.log(student1.city);
+
+console.log(student2.name);
+console.log(student2.rollno);
+console.log(student2.city);
