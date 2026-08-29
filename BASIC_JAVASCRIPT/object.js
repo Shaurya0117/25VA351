@@ -57,3 +57,18 @@ console.log(student1.city);
 console.log(student2.name);
 console.log(student2.rollno);
 console.log(student2.city);
+
+class Student{
+   constructor(name,pincode){
+      this.name=name;
+      this.pincode=pincode;
+   }
+   display(){
+  console.log(this.name)
+  console.log(this.pincode)
+   }
+};
+let s1=new Student("vikas",203639)
+let s2=new Student("sumit",3699363)
+s1.display()
+s2.display() 
