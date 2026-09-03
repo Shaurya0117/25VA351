@@ -1,3 +1,5 @@
+//Object is kind of like map where we have key-value pairs
+
 //Object creation
 
 // Object 1
