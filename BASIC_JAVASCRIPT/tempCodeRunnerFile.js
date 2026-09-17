@@ -1,18 +1,20 @@
-let student = {
-    first: "Shaurya",
-    last: "Singh",
-    city: "Jaunpur",
-    pincode: 222145,
-    salary: function()
-    {
-        Document.write("salary"):
-    }
-    subject:["web dev","c++","java"]
+function sum(...value) {
+//     let total = 0;
+//     for(let n of value){
+//         total = total +n;
+//     }
+//     return total;
+// }
+// console.log(sum(10,20,30));
 
-}
-console.log(student.first);
-console.log(student.last);
-console.log(student.city);
-console.log(student.pincode);
-console.log(student.salary);
-console.log(student.subjct);
+
+// function sum(name, ...value) {
+//     let total = 0;
+
+//     for (let n of value) {
+//         total = total + n;
+//     }
+
+//     console.log("Name:", name);
+//     console.log("Roll No:", value);
+// }
