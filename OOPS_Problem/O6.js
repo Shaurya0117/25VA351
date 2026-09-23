@@ -47,7 +47,7 @@ class Patient extends Person {
 const doc1 = new Doctor(1, "Dr. Anamika", 45, "Cardiology", 800);
 const doc2 = new Doctor(2, "Dr. Verma", 39, "Orthopedics", 600);
 const pat1 = new Patient(3, "Aman", 25, "Fracture", "R101");
-const pat2 = new Patient(4, "Neha", 30, "Fever", "R102");
+const pat2 = new Patient(4,"Ram");
 
 doc1.displayDetails();
 console.log("---");
